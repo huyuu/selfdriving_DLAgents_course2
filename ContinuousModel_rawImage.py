@@ -20,7 +20,7 @@ def train_test_split(images, subParas, labels, trainRatio=0.99):
 class DeepModel():
     def __init__(self):
         # self.traceDataDirPath = '../data/trace1'
-        self.traceDataDirPath = '../data/trace1'
+        self.traceDataDirPath = '../data/trace2'
         # load model
         self.modelPath = './continuousModel_rawImage.h5'
         self.model = self.__loadModel()
@@ -29,25 +29,25 @@ class DeepModel():
     # MARK: - Public Method
 
     def run(self):
-        images, subParas, labels = self.__loadAllTrainingDataSet()
-        # for images, subParas, labels in self.__loadOneTrainingDataSet():
-        images_train, subParas_train, labels_train, images_test, subParas_test, labels_test = train_test_split(images, subParas, labels, trainRatio=0.99)
-        # print(images_train.shape)
-        # print(subParas_train.shape)
-        # print(labels_train.shape)
-        self.model.summary()
-        self.model.fit(
-            [images_train, subParas_train],
-            # images_train,
-            labels_train,
-            batch_size=16,
-            epochs=50,
-            validation_split=0.1
-        )
-        print("Evaluate on test data")
-        results = self.model.evaluate([images_test, subParas_test], labels_test, batch_size=16)
-        print("test loss, test acc:", results)
-        self.model.save(self.modelPath)
+        # images, subParas, labels = self.__loadAllTrainingDataSet()
+        for images, subParas, labels in self.__loadOneTrainingDataSet():
+            images_train, subParas_train, labels_train, images_test, subParas_test, labels_test = train_test_split(images, subParas, labels, trainRatio=0.99)
+            # print(images_train.shape)
+            # print(subParas_train.shape)
+            # print(labels_train.shape)
+            self.model.summary()
+            self.model.fit(
+                [images_train, subParas_train],
+                # images_train,
+                labels_train,
+                batch_size=16,
+                epochs=20,
+                validation_split=0.1
+            )
+            print("Evaluate on test data")
+            results = self.model.evaluate([images_test, subParas_test], labels_test, batch_size=16)
+            print("test loss, test acc:", results)
+            self.model.save(self.modelPath)
 
 
     # MARK: - Private Method
@@ -101,6 +101,7 @@ class DeepModel():
 
     def __loadOneTrainingDataSet(self):
         dataSetDirNames = list(filter(lambda name: '2021' in name, os.listdir(f"{self.traceDataDirPath}/")))
+        dataSetDirNames = dataSetDirNames * 5
         dataSetDirNames = np.random.permutation(dataSetDirNames)
         for dataSetDirName in dataSetDirNames:
             images = []
@@ -127,18 +128,21 @@ class DeepModel():
                 # if abs(logData.loc[index, 'Next Steering Angle']) <= 1e-2:
                 #     continue
                 labels.append(logData.loc[index, 'Next Steering Angle'])
+                labels.append(logData.loc[index, 'Next Steering Angle'] * (-1.0))
                 # load images
                 imageName = logData.loc[index, 'Center Image'].split('\\')[-1]
                 imagePath = f"{self.traceDataDirPath}/{dataSetDirName}/IMG/{imageName}"
                 image = cv2.imread(imagePath, cv2.IMREAD_COLOR)
                 image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-                # image = getCenterDeviationWithImage(image)
+                image_flipped = cv2.flip(image, 1)
                 images.append(image.astype("float32") / 255)
+                images.append(image_flipped.astype("float32") / 255)
 
                 # subPara = logData.loc[index, ['Steering Angle', 'Throttle', 'Speed']].values.ravel()
                 # subPara[2] /= 30.5
-                subPara = logData.loc[index, 'Steering Angle']
+                subPara = float(logData.loc[index, 'Steering Angle'])
                 subParas.append(subPara)
+                subParas.append(-subPara)
                 noneStraightDataCount += 1
 
             # print(logData.groupby('Next Steering Angle').count())

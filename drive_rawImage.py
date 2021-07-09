@@ -23,7 +23,6 @@ import tensorflow as tf
 #csv 2018/10/03
 import csv
 #csv 2018/10/03 finish
-from ContinuousModelClass import getCenterDeviationWithImage
 
 sio = socketio.Server()
 app = Flask(__name__)
@@ -62,7 +61,7 @@ def telemetry(sid, data):
     # action = np.argmax(action_prob)
 
     # steering_angle_before = model.predict(image, batch_size=None)[0, 0]
-    steering_angle_before = model.predict([image, subPara], batch_size=None)[0, 0] * 0.7
+    steering_angle_before = model.predict([image, subPara], batch_size=None)[0, 0]
     # steering_angle_before = max(-0.5, min(0.5, steering_angle_before))
     throttle_before = 1.0
     print(steering_angle_before)
