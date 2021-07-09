@@ -128,7 +128,7 @@ class DeepModel():
                 # if abs(logData.loc[index, 'Next Steering Angle']) <= 1e-2:
                 #     continue
                 labels.append(logData.loc[index, 'Next Steering Angle'])
-                labels.append(logData.loc[index, 'Next Steering Angle'] * (-1.0))
+                labels.append(logData.loc[index, 'Next Steering Angle'] * (-1.0d))
                 # load images
                 imageName = logData.loc[index, 'Center Image'].split('\\')[-1]
                 imagePath = f"{self.traceDataDirPath}/{dataSetDirName}/IMG/{imageName}"
