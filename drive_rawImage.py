@@ -63,8 +63,15 @@ def telemetry(sid, data):
     # steering_angle_before = model.predict(image, batch_size=None)[0, 0]
     steering_angle_before = model.predict([image, subPara], batch_size=None)[0, 0]
     # steering_angle_before = max(-0.5, min(0.5, steering_angle_before))
-    throttle_before = 1.0
-    print(steering_angle_before)
+    throttle_before = 1.0 if speed <= 0.7 else 0.0
+    # if abs(steering_angle_before) <= 0.1:
+    #     throttle_before = 0.8
+    # else:
+    #     if speed <= 0.7:
+    #         throttle_before = 0.7
+    #     else:
+    #         throttle_before = 0.0
+    print(steering_angle_before, throttle_before)
     # calculate action
     # steering_angle_before, throttle_before = [0.0, 0.0]
     # if action == 0: # turn left

@@ -29,13 +29,14 @@ class DeepModel():
     # MARK: - Public Method
 
     def run(self):
+        self.model.summary()
         # images, subParas, labels = self.__loadAllTrainingDataSet()
         for images, subParas, labels in self.__loadOneTrainingDataSet():
             images_train, subParas_train, labels_train, images_test, subParas_test, labels_test = train_test_split(images, subParas, labels, trainRatio=0.99)
             # print(images_train.shape)
             # print(subParas_train.shape)
             # print(labels_train.shape)
-            self.model.summary()
+            # self.model.summary()
             self.model.fit(
                 [images_train, subParas_train],
                 # images_train,
@@ -48,6 +49,7 @@ class DeepModel():
             results = self.model.evaluate([images_test, subParas_test], labels_test, batch_size=16)
             print("test loss, test acc:", results)
             self.model.save(self.modelPath)
+            del images_train, subParas_train, labels_train, images_test, subParas_test, labels_test
 
 
     # MARK: - Private Method
@@ -101,8 +103,8 @@ class DeepModel():
 
     def __loadOneTrainingDataSet(self):
         dataSetDirNames = list(filter(lambda name: '2021' in name, os.listdir(f"{self.traceDataDirPath}/")))
+        dataSetDirNames = np.random.permutation(dataSetDirNames).tolist()
         dataSetDirNames = dataSetDirNames * 5
-        dataSetDirNames = np.random.permutation(dataSetDirNames)
         for dataSetDirName in dataSetDirNames:
             images = []
             subParas = []
@@ -128,7 +130,7 @@ class DeepModel():
                 # if abs(logData.loc[index, 'Next Steering Angle']) <= 1e-2:
                 #     continue
                 labels.append(logData.loc[index, 'Next Steering Angle'])
-                labels.append(logData.loc[index, 'Next Steering Angle'] * (-1.0d))
+                labels.append(logData.loc[index, 'Next Steering Angle'] * (-1.0))
                 # load images
                 imageName = logData.loc[index, 'Center Image'].split('\\')[-1]
                 imagePath = f"{self.traceDataDirPath}/{dataSetDirName}/IMG/{imageName}"
