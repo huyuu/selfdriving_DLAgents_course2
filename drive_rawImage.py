@@ -31,6 +31,7 @@ prev_image_array = None
 
 e_fst = 0.0
 e_sec = 0.0
+sameCount = 0
 
 
 @sio.on('telemetry')
@@ -63,7 +64,16 @@ def telemetry(sid, data):
     # steering_angle_before = model.predict(image, batch_size=None)[0, 0]
     steering_angle_before = model.predict([image, subPara], batch_size=None)[0, 0]
     # steering_angle_before = max(-0.5, min(0.5, steering_angle_before))
-    throttle_before = 1.0 if speed <= 0.7 else 0.0
+    # throttle_before = 1.0# if speed <= 0.9 else 0.0
+    # throttle_before = 0.5 if abs(steering_angle_before) <= 0.25 else -1.0
+    throttle_before = 1.0
+    global sameCount
+    if np.sign(steering_angle_before) == np.sign(steering_angle):
+        sameCount += 1
+    else:
+        sameCount = 0
+    if sameCount >= 3:
+        throttle_before = -1.0 if speed >= 0.4 else 0.5
     # if abs(steering_angle_before) <= 0.1:
     #     throttle_before = 0.8
     # else:
